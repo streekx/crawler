@@ -5,39 +5,40 @@ import hashlib
 class SearchParser:
     @staticmethod
     def get_fingerprint(text):
-        # Near-duplicate detection using content hashing
+        """Content hash banata hai taaki duplicate pages detect ho sakein."""
         return hashlib.md5(text.encode()).hexdigest()
 
     @staticmethod
-    def is_valid(url, base_domain):
+    def is_valid(url):
+        """Check karta hai ki URL sahi hai ya nahi."""
         parsed = urlparse(url)
-        # External links skip karke sirf same domain focus kar sakte hain 
-        # Ya phir open web crawl ke liye sirf scheme check karein
         return bool(parsed.netloc) and parsed.scheme in ("http", "https")
 
     @staticmethod
     def clean_and_extract(html, current_url):
-        soup = BeautifulSoup(html, 'lxml') # Fast 'lxml' parser
+        """HTML se kachra saaf karke saaf text aur links nikalta hai."""
+        soup = BeautifulSoup(html, 'lxml') # 'lxml' mobile par fast chalta hai
         
-        # Remove SEO-Irrelevant content
-        for tag in soup(["script", "style", "nav", "footer", "aside", "header"]):
+        # Unnecessary tags ko delete karo
+        for tag in soup(["script", "style", "nav", "footer", "aside", "header", "form", "button"]):
             tag.decompose()
 
-        title = soup.title.string.strip() if soup.title else "Untitled"
+        title = soup.title.string.strip() if soup.title else "Untitled Page"
+        
+        # Sirf main body text uthao
         text = soup.get_text(separator=' ', strip=True)
         
-        # Internal & External Link Discovery
+        # Link Discovery: Page ke andar se aur links dhundo
         links = []
         for a in soup.find_all('a', href=True):
             full_url = urljoin(current_url, a['href'])
-            if SearchParser.is_valid(full_url, urlparse(current_url).netloc):
+            if SearchParser.is_valid(full_url):
                 links.append(full_url)
 
         return {
             "url": current_url,
             "title": title,
-            "content": text[:8000], # Optimal content size
+            "content": text[:8000], # RAM aur storage bachane ke liye limit
             "fingerprint": SearchParser.get_fingerprint(text),
-            "links": list(set(links))
+            "links": list(set(links)) # Unique links ki list
         }
-
