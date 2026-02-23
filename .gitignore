@@ -1,0 +1,21 @@
+# Python temporary files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environment variables (Apni API keys bachane ke liye)
+.env
+config_secret.py
+
+# Local databases
+*.db
+*.sqlite3
+
+# OS related files
+.DS_Store
+Thumbs.db
+
+# Virtual environments
+venv/
+env/
+
