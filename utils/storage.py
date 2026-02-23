@@ -4,9 +4,9 @@ import logging
 class SupabaseStorage:
     def __init__(self, config):
         self.config = config
-        self.url = f"{config.https://jhyqyskemsvoizmmupka.supabase.co}/rest/v1/pages"
+        self.url = f"{config.SUPABASE_URL}/rest/v1/pages"
         self.headers = {
-            "apikey": self.config.sb_publishable_POOzlE7yRolLFYE1Su5vog_UChpyvb9,
+            "apikey": self.config.SUPABASE_KEY,
             "Authorization": f"Bearer {self.config.SUPABASE_KEY}",
             "Content-Type": "application/json",
             "Prefer": "resolution=merge-duplicates" # Powerful: Unique URL par purana data update karega
