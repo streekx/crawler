@@ -1,7 +1,7 @@
 class Config:
     # --- Supabase Credentials ---
-    SUPABASE_URL = "https://your-project-id.supabase.co"
-    SUPABASE_KEY = "your-service-role-or-anon-key"
+    SUPABASE_URL = "https://jhyqyskemsvoizmmupka.supabase.co"
+    SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpoeXF5c2tlbXN2b2l6bW11cGthIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE4NDQ5ODUsImV4cCI6MjA4NzQyMDk4NX0.IvjAWJZ4DeOCNG0SzKgV5P-LXW2aYvX_RA-NDw5S-ec"
 
     # --- Crawler Settings ---
     MAX_PAGES = 25000
