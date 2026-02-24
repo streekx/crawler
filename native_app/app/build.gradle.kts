@@ -1,6 +1,6 @@
 plugins {
-    id("com.android.application") version "8.2.2"
-    id("org.jetbrains.kotlin.android") version "1.9.22"
+    id("com.android.application")
+    id("org.jetbrains.kotlin.android")
 }
 
 android {
@@ -14,7 +14,7 @@ android {
         versionCode = 1
         versionName = "1.0"
     }
-
+    
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -35,12 +35,7 @@ dependencies {
     implementation("androidx.appcompat:appcompat:1.6.1")
     implementation("com.google.android.material:material:1.10.0")
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
-    
-    // Search Engine networking (OkHttp)
     implementation("com.squareup.okhttp3:okhttp:4.11.0")
-    
-    // UI components for Search Results and Account Drawer
     implementation("androidx.recyclerview:recyclerview:1.3.1")
     implementation("androidx.cardview:cardview:1.0.0")
 }
-
