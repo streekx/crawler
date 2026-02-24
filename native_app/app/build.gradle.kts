@@ -1,7 +1,9 @@
+// native_app/app/build.gradle.kts (APP FILE)
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
 }
+// Iske niche aapka pura android { ... } aur dependencies { ... } block rahega.
 
 android {
     namespace = "com.indie.search"
