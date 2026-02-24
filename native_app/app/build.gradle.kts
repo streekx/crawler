@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.native_app" 
+    namespace = "com.streekx.app" 
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.example.native_app"
+        applicationId = "com.streekx.app"
         minSdk = 24
         targetSdk = 34
         versionCode = 1
