@@ -1,34 +1,4 @@
-name: Build Streekx APK Master
-on: [push]
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v3
-
-      - name: Set up JDK 17
-        uses: actions/setup-java@v3
-        with:
-          java-version: '17'
-          distribution: 'temurin'
-
-      # Yeh step gradlew file aur wrapper ko zero se generate karega
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v3
-
-      - name: Repair and Build
+      - name: Force Build
         run: |
           cd native_app
-          # Agar wrapper nahi hai toh generate karo
-          gradle wrapper --gradle-version 8.1.1
-          chmod +x gradlew
-          # Final Build Command
-          ./gradlew assembleDebug
-
-      - name: Upload APK
-        uses: actions/upload-artifact@v3
-        with:
-          name: streekx-app-final
-          path: native_app/app/build/outputs/apk/debug/app-debug.apk
+          gradle assembleDebug --stacktrace
