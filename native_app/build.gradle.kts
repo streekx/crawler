@@ -1,7 +1,8 @@
 plugins {
-    id("com.android.application")
-    id("org.jetbrains.kotlin.android")
+    id("com.android.application") version "8.2.2" // Version likhna zaroori hai
+    id("org.jetbrains.kotlin.android") version "1.9.22" // Version likhna zaroori hai
 }
+
 
 android {
     namespace = "com.indie.search"
