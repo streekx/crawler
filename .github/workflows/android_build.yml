@@ -22,9 +22,10 @@ jobs:
         uses: gradle/actions/setup-gradle@v3
 
       - name: Build with Gradle
-        run: |
-          cd native_app
-          gradle assembleDebug --stacktrace
+  run: |
+    cd native_app
+    chmod +x gradlew
+    ./gradlew assembleDebug --stacktrace
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
