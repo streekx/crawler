@@ -26,4 +26,11 @@
         android:textColor="#4D5156"
         android:textSize="14sp"
         android:maxLines="3" />
+
+    <TextView
+    style="@style/MenuStyle"
+    android:layout_width="match_parent" 
+    android:layout_height="wrap_content"
+    android:padding="15dp" />
+
 </LinearLayout>
