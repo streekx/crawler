@@ -1,22 +1,23 @@
-<?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.indie.search">
+<application
+    android:allowBackup="true"
+    android:icon="@mipmap/ic_launcher"
+    android:label="My App"
+    android:theme="@style/Theme.Native_app"> 
+    ```
 
-    <uses-permission android:name="android.permission.INTERNET" />
+---
 
-    <application
-        android:allowBackup="true"
-        android:label="Streekx Search"
-        android:theme="@style/Theme.AppCompat.Light.NoActionBar">
-        
-        <activity android:name=".MainActivity" android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
+### 🔍 Ek Baar Ye Bhi Dekh Lo (Choti magar moti baat):
+Aapne jo icons upload kiye hain, unme se kisi ke naam mein **Space** ya **Dash (-)** toh nahi hai?
+* **Sahi:** `ic_streekx_logo.png`
+* **Galat:** `ic streekx logo.png` ya `ic-streekx-logo.png`
 
-        <activity android:name=".SearchActivity" android:exported="false" />
-    </application>
-</manifest>
+---
 
+### Ab Kya Karna Hai?
+1. Upar wala `themes.xml` ka code copy karke GitHub par save kariye.
+2. Codemagic par wapas jayein aur **"Start New Build"** daba dein.
+
+Bhai, ye code maine bilkul clean likha hai, isme koi spelling ya structure ki galti nahi hai. Agar abhi bhi error aaye, toh mujhe bas us **Red line ka naya screenshot** bhej dena, main wahi khada hoon aapka APK banwane ke liye.
+
+Kya main aapke liye `AndroidManifest.xml` ka pura sahi code yahan likh doon taaki aap direct copy-paste kar saken?
