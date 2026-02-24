@@ -25,7 +25,6 @@
         <ImageView
             android:layout_width="40dp"
             android:layout_height="40dp"
-            android:src="@drawable/ic_streekx_logo"/> <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -52,7 +51,7 @@
         android:background="@color/divider_color"
         android:layout_marginVertical="15dp"/>
 
-    <TextView style="@style/MenuStyle" android:text="@string/menu_searches" android:drawableStart="@drawable/ic_search_history"/>
+ //<TextView style="@style/MenuStyle" android:text="@string/menu_searches" android:drawableStart="@drawable/ic_search_history"/>
     <TextView style="@style/MenuStyle" android:text="@string/menu_threads" android:drawableStart="@drawable/ic_threads"/>
     <TextView style="@style/MenuStyle" android:text="@string/menu_projects" android:drawableStart="@drawable/ic_projects"/>
     <TextView style="@style/MenuStyle" android:text="@string/menu_settings" android:drawableStart="@drawable/ic_settings"/>
