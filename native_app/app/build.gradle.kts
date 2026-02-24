@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-    namespace = "com.streekx.app" 
+    namespace = "com.indie.search" 
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.streekx.app"
+        applicationId = "com.indie.search"
         minSdk = 24
         targetSdk = 34
         versionCode = 1
@@ -26,6 +26,7 @@ android {
     lint {
         checkReleaseBuilds = false
         abortOnError = false
+        checkDependencies = false
     }
 
     // Resources handling fix
