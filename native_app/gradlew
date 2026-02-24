@@ -1,3 +1,0 @@
-#!/usr/bin/env bash
-echo "Gradle wrapper placeholder. Please generate a real one using 'gradle wrapper' locally."
-exit 1
