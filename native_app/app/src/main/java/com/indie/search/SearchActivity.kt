@@ -14,6 +14,10 @@ class SearchActivity : AppCompatActivity() {
 
     private lateinit var adapter: SearchAdapter
     private val client = OkHttpClient()
+    
+    // Aapki Supabase Details maine yahan daal di hain
+    private val supabaseUrl = "https://jhyqyskemsvoizmmupka.supabase.co/rest/v1/pages"
+    private val supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpoeXF5c2tlbXN2b2l6bW11cGthIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE4NDQ5ODUsImV4cCI6MjA4NzQyMDk4NX0.IvjAWJZ4DeOCNG0SzKgV5P-LXW2aYvX_RA-NDw5S-ec"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -26,14 +30,6 @@ class SearchActivity : AppCompatActivity() {
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.adapter = adapter
 
-        // Get query from intent (Coming from Home Screen)
-        val initialQuery = intent.getStringExtra("query")
-        if (initialQuery != null) {
-            searchBar.setText(initialQuery)
-            fetchResults(initialQuery)
-        }
-
-        // Handle search from bottom bar
         searchBar.setOnEditorActionListener { v, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_SEARCH) {
                 fetchResults(v.text.toString())
@@ -43,11 +39,11 @@ class SearchActivity : AppCompatActivity() {
     }
 
     private fun fetchResults(query: String) {
-        val url = "YOUR_SUPABASE_URL/rest/v1/pages?content=ilike.*$query*&select=title,url,content"
+        val url = "$supabaseUrl?content=ilike.*$query*&select=title,url,content"
         val request = Request.Builder()
             .url(url)
-            .addHeader("apikey", "YOUR_ANON_KEY")
-            .addHeader("Authorization", "Bearer YOUR_ANON_KEY")
+            .addHeader("apikey", supabaseKey)
+            .addHeader("Authorization", "Bearer $supabaseKey")
             .build()
 
         client.newCall(request).enqueue(object : Callback {
@@ -60,9 +56,9 @@ class SearchActivity : AppCompatActivity() {
                     for (i in 0 until jsonArray.length()) {
                         val obj = jsonArray.getJSONObject(i)
                         results.add(SearchResult(
-                            obj.getString("title"),
-                            obj.getString("url"),
-                            obj.getString("content")
+                            obj.optString("title", "No Title"),
+                            obj.optString("url", "#"),
+                            obj.optString("content", "")
                         ))
                     }
                     runOnUiThread { adapter.updateData(results) }
@@ -71,4 +67,3 @@ class SearchActivity : AppCompatActivity() {
         })
     }
 }
-
