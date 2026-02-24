@@ -1,1 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@drawable/sheet_rounded_bg"
+    android:padding="20dp">
 
+    <View
+        android:layout_width="40dp"
+        android:layout_height="4dp"
+        android:layout_gravity="center"
+        android:background="#DADCE0"
+        android:layout_marginBottom="20dp"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:background="@drawable/sso_btn_bg"
+        android:padding="12dp">
+        
+        <ImageView
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:src="@drawable/ic_streekx_logo"/> <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:layout_marginStart="12dp">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Streekx Account"
+                android:textStyle="bold"
+                android:textColor="@color/black"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Single Sign-On Active"
+                android:textSize="12sp"
+                android:textColor="@color/primary_blue"/>
+        </LinearLayout>
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/divider_color"
+        android:layout_marginVertical="15dp"/>
+
+    <TextView style="@style/MenuStyle" android:text="@string/menu_searches" android:drawableStart="@drawable/ic_search_history"/>
+    <TextView style="@style/MenuStyle" android:text="@string/menu_threads" android:drawableStart="@drawable/ic_threads"/>
+    <TextView style="@style/MenuStyle" android:text="@string/menu_projects" android:drawableStart="@drawable/ic_projects"/>
+    <TextView style="@style/MenuStyle" android:text="@string/menu_settings" android:drawableStart="@drawable/ic_settings"/>
+    <TextView style="@style/MenuStyle" android:text="@string/menu_security" android:drawableStart="@drawable/ic_security"/>
+
+</LinearLayout>
