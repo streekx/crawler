@@ -1,0 +1,20 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="20dp"
+    android:background="#FFFFFF">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Streekx Account (SSO)"
+        android:textStyle="bold"
+        android:textSize="20sp"
+        android:paddingBottom="15dp" />
+
+    <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Searches" android:padding="10dp" />
+    <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Threads" android:padding="10dp" />
+    <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Projects" android:padding="10dp" />
+    <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Settings" android:padding="10dp" />
+</LinearLayout>
