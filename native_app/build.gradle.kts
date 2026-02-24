@@ -1,8 +1,7 @@
 plugins {
-    id("com.android.application") version "8.2.2" // Version likhna zaroori hai
-    id("org.jetbrains.kotlin.android") version "1.9.22" // Version likhna zaroori hai
+    id("com.android.application") version "8.2.2" 
+    id("org.jetbrains.kotlin.android") version "1.9.22"
 }
-
 
 android {
     namespace = "com.indie.search"
@@ -15,6 +14,8 @@ android {
         versionCode = 1
         versionName = "1.0"
     }
+    // ... baaki ka code sahi hai
+}
 
     buildTypes {
         release {
