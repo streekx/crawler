@@ -14,5 +14,5 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "StreekxSearch"
-//include(":app")
+include(":app")
 
