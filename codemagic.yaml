@@ -2,12 +2,12 @@
 workflows:
   android-workflow:
     name: Android Debug Build
-    instance_type: linux
+    instance_type: mac_mini_m1 # <--- Ye free tier mein available hai
     max_build_duration: 60
     working_directory: native_app
     scripts:
       - name: Build Android Debug APK
-        script: | # <--- Yahan 'run' ki jagah 'script' kar diya hai
+        script: |
           chmod +x gradlew
           ./gradlew assembleDebug
     artifacts:
