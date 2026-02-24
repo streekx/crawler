@@ -1,4 +1,5 @@
 name: Build Streekx APK
+
 on:
   push:
     branches:
@@ -8,6 +9,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -18,14 +20,11 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v3
-
-      - name: Build with Gradle
-  run: |
-    cd native_app
-    chmod +x gradlew
-    ./gradlew assembleDebug --stacktrace
+      - name: Build APK
+        run: |
+          cd native_app
+          chmod +x gradlew
+          ./gradlew assembleDebug --stacktrace
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
