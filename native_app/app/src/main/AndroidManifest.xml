@@ -4,9 +4,9 @@
 
     <application
         android:allowBackup="true"
-        android:icon="@mipmap/ic_launcher"
-        android:label="My App"
-        android:theme="@style/Theme.Native_app">
+        android:icon="@drawable/ic_streekx_logo"
+        android:label="Indie Search"
+        android:theme="@style/Theme.AppCompat.Light.NoActionBar">
 
         <activity
             android:name=".MainActivity"
