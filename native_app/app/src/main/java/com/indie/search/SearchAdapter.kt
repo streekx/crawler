@@ -24,7 +24,7 @@ class SearchAdapter(private var results: MutableList<SearchResult>) :
         val item = results[position]
         holder.title.text = item.title
         holder.url.text = item.url
-        holder.snippet.text = if (item.content.length > 150) item.content.take(150) + "..." else item.content
+        holder.snippet.text = if (item.content.length > 120) item.content.take(120) + "..." else item.content
     }
 
     override fun getItemCount() = results.size
