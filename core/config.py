@@ -16,8 +16,26 @@ class Config:
     USER_AGENT = "IndependentBot/1.0 (+https://yourwebsite.com/bot)"
     
     SEEDS = [
-        "https://en.wikipedia.org/wiki/Special:Random", # Discovery start
-        "https://news.ycombinator.com",
-        "https://www.reuters.com"
-    ]
-
+    # Tech & Startups (Nayi websites dhoondne ke liye)
+    "https://news.ycombinator.com",
+    "https://www.producthunt.com",
+    "https://www.indiehackers.com",
+    
+    # Global News (Latest updates ke liye)
+    "https://www.reuters.com",
+    "https://www.bbc.com/news",
+    "https://www.nytimes.com",
+    "https://www.theguardian.com",
+    
+    # Science & Tech Blogs
+    "https://www.theverge.com",
+    "https://www.wired.com",
+    "https://www.techcrunch.com",
+    "https://www.engadget.com",
+    
+    # Knowledge & Directories (Links ka khazana)
+    "https://www.wikipedia.org",
+    "https://www.britannica.com",
+    "https://www.reddit.com/r/technology",
+    "https://www.medium.com"
+]
