@@ -5,9 +5,9 @@ class Config:
 
     # --- Crawler Settings ---
     MAX_PAGES = 100000
-    CONCURRENCY = 15          # Mobile par high speed ke liye
+    CONCURRENCY = 25          # Mobile par high speed ke liye
     TIMEOUT = 12              # Seconds
-    DELAY = 0.5               # Per request delay (Politeness)
+    DELAY = 0.1               # Per request delay (Politeness)
     
     # --- Search Quality ---
     MIN_TEXT_LENGTH = 300     # Chhoti pages skip karne ke liye
