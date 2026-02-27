@@ -4,7 +4,7 @@ class Config:
     SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpoeXF5c2tlbXN2b2l6bW11cGthIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE4NDQ5ODUsImV4cCI6MjA4NzQyMDk4NX0.IvjAWJZ4DeOCNG0SzKgV5P-LXW2aYvX_RA-NDw5S-ec"
 
     # --- Crawler Settings ---
-    MAX_PAGES = 25000
+    MAX_PAGES = 100000
     CONCURRENCY = 15          # Mobile par high speed ke liye
     TIMEOUT = 12              # Seconds
     DELAY = 0.5               # Per request delay (Politeness)
