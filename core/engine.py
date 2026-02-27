@@ -26,7 +26,7 @@ class IndependentEngine:
                         continue
 
                     domain = urlparse(url).netloc
-                    if url in self.seen_urls or self.domain_history.get(domain, 0) > 200:
+                    if url in self.seen_urls or self.domain_history.get(domain, 0) > 50:
                         self.queue.task_done()
                         continue
 
