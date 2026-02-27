@@ -1,86 +1,70 @@
 import asyncio
 import aiohttp
-import logging
-from datetime import datetime
-from utils.parser import SearchParser
+from bs4 import BeautifulSoup
+from urllib.parse import urlparse, urljoin
 
-class IndependentEngine:
-    def __init__(self, config, storage):
+class CrawlerEngine:
+    def __init__(self, config, storage, parser):
         self.config = config
         self.storage = storage
+        self.parser = parser
         self.queue = asyncio.Queue()
-        self.seen_urls = set()
-        self.total_crawled = 0
+        self.visited = set()
 
-    async def worker(self, worker_id):
-        """Ek independent worker jo queue se URLs nikal kar crawl karta hai."""
-        async with aiohttp.ClientSession(headers={"User-Agent": self.config.USER_AGENT}) as session:
-            while self.total_crawled < self.config.MAX_PAGES:
-                # 1. Queue se URL uthao
-                try:
-                    url, depth = await self.queue.get()
-                except asyncio.CancelledError:
-                    break
+    async def add_to_queue(self, url):
+        if url not in self.visited:
+            await self.queue.put(url)
 
-                # 2. Duplicate check
-                if url in self.seen_urls:
-                    self.queue.task_done()
-                    continue
+    async def crawl(self, url):
+        if url in self.visited:
+            return
+        
+        self.visited.add(url)
+        current_domain = urlparse(url).netloc
+        print(f"[*] Crawling: {url}")
 
-                try:
-                    # 3. Page fetch karo
-                    async with session.get(url, timeout=self.config.TIMEOUT) as response:
-                        if response.status == 200:
-                            html = await response.text()
-                            
-                            # 4. Data extract karo (Parser ka use karke)
-                            data = SearchParser.clean_and_extract(html, url)
-                            
-                            if data and len(data['content']) > self.config.MIN_TEXT_LENGTH:
-                                # 5. Database (Supabase) mein save karo
-                                db_payload = {
-                                    "url": data['url'],
-                                    "title": data['title'],
-                                    "content": data['content'],
-                                    "fingerprint": data['fingerprint'],
-                                    "last_indexed": datetime.utcnow().isoformat()
-                                }
-                                await self.storage.save(session, db_payload)
-                                
-                                self.total_crawled += 1
-                                self.seen_urls.add(url)
-                                print(f"Worker-{worker_id} | Indexed: {url}")
-
-                                # 6. Naye links ko queue mein daalo (Discovery)
-                                if depth < self.config.MAX_DEPTH:
-                                    for link in data['links']:
-                                        if link not in self.seen_urls:
-                                            await self.queue.put((link, depth + 1))
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.get(url, timeout=10) as response:
+                    if response.status != 200:
+                        return
                     
-                    # Politeness delay taaki server block na kare
-                    await asyncio.sleep(self.config.DELAY)
+                    html = await response.text()
+                    soup = BeautifulSoup(html, 'html.parser')
+                    
+                    # Data extract karna
+                    title = soup.title.string if soup.title else "No Title"
+                    content = soup.get_text()[:500] # Pehle 500 characters
+                    
+                    # Supabase mein save karna
+                    await self.storage.save(session, {
+                        "url": url,
+                        "title": title,
+                        "content": content
+                    })
 
-                except Exception as e:
-                    # Chhoti-moti errors (like 404 ya timeout) ko ignore karein
-                    pass
-                finally:
-                    self.queue.task_done()
+                    # GOOGLE-STYLE DISCOVERY: Naye domains dhoondhna
+                    for link in soup.find_all('a', href=True):
+                        full_url = urljoin(url, link['href'])
+                        link_domain = urlparse(full_url).netloc
+                        
+                        # Agar naya domain mile toh use priority dho
+                        if link_domain and link_domain != current_domain:
+                            # print(f"[+] New Domain Found: {link_domain}")
+                            await self.add_to_queue(full_url)
+                        else:
+                            # Internal links ko bhi queue mein rakho
+                            await self.add_to_queue(full_url)
 
-    async def start(self):
-        """Crawler ko boostrap karne aur workers start karne ke liye."""
-        # Initial Seed URLs queue mein daalo
-        for seed in self.config.SEEDS:
-            await self.queue.put((seed, 0))
+        except Exception as e:
+            print(f"[!] Error crawling {url}: {e}")
+
+    async def run(self, seeds):
+        for seed in seeds:
+            await self.add_to_queue(seed)
         
-        # Multiple workers ek saath start karein (Concurrency)
-        workers = []
-        for i in range(self.config.CONCURRENCY):
-            worker_task = asyncio.create_task(self.worker(i))
-            workers.append(worker_task)
-        
-        # Wait karein jab tak queue khatam na ho jaye ya limit reach na ho
-        await self.queue.join()
-        
-        # Kaam khatam hone par workers band karein
-        for w in workers:
-            w.cancel()
+        while not self.queue.empty():
+            url = await self.queue.get()
+            await self.crawl(url)
+            self.queue.task_done()
+            await asyncio.sleep(1) # Server ko block na karne ke liye
