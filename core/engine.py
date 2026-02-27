@@ -19,12 +19,12 @@ class IndependentEngine:
         async with aiohttp.ClientSession(headers=headers) as session:
             while self.total_crawled < self.config.MAX_PAGES:
                 try:
-                    # Queue se URL uthao
+                    # Non-blocking way to get URLs from queue
                     url, depth = await self.queue.get()
                     domain = urlparse(url).netloc
 
-                    # Rule: Ek domain ke limit se zyada pages skip karo taaki variety bani rahe
-                    if self.domain_history.get(domain, 0) > 40:
+                    # Variety Rule: Ek domain ke limited pages hi lo
+                    if self.domain_history.get(domain, 0) > 50:
                         self.queue.task_done()
                         continue
 
@@ -53,27 +53,27 @@ class IndependentEngine:
                                 self.seen_urls.add(url)
                                 self.domain_history[domain] = self.domain_history.get(domain, 0) + 1
 
-                                # RECURSION: Naye links ko wapas queue mein dalo (Ye rasta nahi rukne dega)
+                                # RECURSION FIX: Naye links ko queue mein daalna
+                                # Yahi wo rasta hai jo Google/Brave ki tarah infinite bana dega
                                 for link in data.get('links', []):
                                     if link not in self.seen_urls:
-                                        # Naye links ko queue mein add karna taaki workers chalta rahe
                                         await self.queue.put((link, depth + 1))
 
                     await asyncio.sleep(self.config.DELAY)
                 except Exception:
                     pass
                 finally:
-                    # Ye important hai taaki queue empty na dikhaye jab tak kaam baki hai
+                    # Queue task ko done mark karna zaroori hai
                     self.queue.task_done()
 
     async def run(self, seeds):
+        # Initial seeds daalna
         for seed in seeds:
             await self.queue.put((seed, 0))
         
-        # Workers create karein
         workers = [asyncio.create_task(self.worker(i)) for i in range(self.config.CONCURRENCY)]
         
-        # Jab tak queue mein kaam hai ya MAX_PAGES nahi hue, wait karein
+        # Join ensures that main doesn't finish until queue is empty
         await self.queue.join()
         
         for w in workers:
