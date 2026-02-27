@@ -8,18 +8,20 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from core.engine import IndependentEngine
 from core.config import Config
 from utils.storage import SupabaseStorage
+from utils.parser import SearchParser  # <--- Ye naya add kiya hai fix ke liye
 
 async def main():
     print("--- 🚀 Independent Search Engine Crawler Starting ---")
     print(f"[*] Target Budget: {Config.MAX_PAGES} pages")
     print(f"[*] Concurrency: {Config.CONCURRENCY} workers")
-    
+
     # 1. Database ko initialize karein
     storage = SupabaseStorage(Config)
-    
-    # 2. Crawler Engine ko setup karein
-    engine = IndependentEngine(Config, storage)
-    
+
+    # 2. Crawler Engine ko setup karein (Parser ke saath)
+    # Ab engine ko parser mil jayega aur error nahi aayega
+    engine = IndependentEngine(Config, storage, SearchParser)
+
     # 3. Crawling shuru karein
     try:
         await engine.start()
@@ -34,4 +36,3 @@ if __name__ == "__main__":
         asyncio.run(main())
     except KeyboardInterrupt:
         print("\n[!] Manual Shutdown Detected. Closing gracefully...")
-
