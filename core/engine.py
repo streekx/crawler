@@ -1,70 +1,67 @@
 import asyncio
 import aiohttp
-from bs4 import BeautifulSoup
+from datetime import datetime
 from urllib.parse import urlparse, urljoin
+from utils.parser import SearchParser
 
-class CrawlerEngine:
+class IndependentEngine:
     def __init__(self, config, storage, parser):
         self.config = config
         self.storage = storage
         self.parser = parser
         self.queue = asyncio.Queue()
-        self.visited = set()
+        self.seen_urls = set()
+        self.domain_counts = {} # Domain variety track karne ke liye
+        self.total_crawled = 0
 
-    async def add_to_queue(self, url):
-        if url not in self.visited:
-            await self.queue.put(url)
+    async def worker(self, worker_id):
+        async with aiohttp.ClientSession(headers={"User-Agent": "StreekxBot/1.0"}) as session:
+            while self.total_crawled < self.config.MAX_PAGES:
+                try:
+                    url, depth = await self.queue.get()
+                    domain = urlparse(url).netloc
 
-    async def crawl(self, url):
-        if url in self.visited:
-            return
-        
-        self.visited.add(url)
-        current_domain = urlparse(url).netloc
-        print(f"[*] Crawling: {url}")
+                    # DOMAIN VARIETY CHECK: Ek domain ke 50 se zyada pages na lein
+                    if self.domain_counts.get(domain, 0) > 50:
+                        self.queue.task_done()
+                        continue
 
-        try:
-            async with aiohttp.ClientSession() as session:
-                async with session.get(url, timeout=10) as response:
-                    if response.status != 200:
-                        return
-                    
-                    html = await response.text()
-                    soup = BeautifulSoup(html, 'html.parser')
-                    
-                    # Data extract karna
-                    title = soup.title.string if soup.title else "No Title"
-                    content = soup.get_text()[:500] # Pehle 500 characters
-                    
-                    # Supabase mein save karna
-                    await self.storage.save(session, {
-                        "url": url,
-                        "title": title,
-                        "content": content
-                    })
+                    if url in self.seen_urls or depth > self.config.MAX_DEPTH:
+                        self.queue.task_done()
+                        continue
 
-                    # GOOGLE-STYLE DISCOVERY: Naye domains dhoondhna
-                    for link in soup.find_all('a', href=True):
-                        full_url = urljoin(url, link['href'])
-                        link_domain = urlparse(full_url).netloc
-                        
-                        # Agar naya domain mile toh use priority dho
-                        if link_domain and link_domain != current_domain:
-                            # print(f"[+] New Domain Found: {link_domain}")
-                            await self.add_to_queue(full_url)
-                        else:
-                            # Internal links ko bhi queue mein rakho
-                            await self.add_to_queue(full_url)
+                    print(f"[*] Worker-{worker_id} | Crawling: {url}")
+                    async with session.get(url, timeout=10) as response:
+                        if response.status == 200:
+                            html = await response.text()
+                            data = self.parser.clean_and_extract(html, url)
 
-        except Exception as e:
-            print(f"[!] Error crawling {url}: {e}")
+                            if data:
+                                payload = {
+                                    "url": data['url'],
+                                    "title": data['title'],
+                                    "content": data['content'],
+                                    "last_indexed": datetime.utcnow().isoformat()
+                                }
+                                await self.storage.save(session, payload)
+                                
+                                # Counts update karein
+                                self.total_crawled += 1
+                                self.seen_urls.add(url)
+                                self.domain_counts[domain] = self.domain_counts.get(domain, 0) + 1
+
+                                # Discovery: Priority to NEW domains
+                                for link in data.get('links', []):
+                                    await self.queue.put((link, depth + 1))
+
+                    await asyncio.sleep(self.config.DELAY)
+                except Exception:
+                    pass
+                finally:
+                    self.queue.task_done()
 
     async def run(self, seeds):
         for seed in seeds:
-            await self.add_to_queue(seed)
-        
-        while not self.queue.empty():
-            url = await self.queue.get()
-            await self.crawl(url)
-            self.queue.task_done()
-            await asyncio.sleep(1) # Server ko block na karne ke liye
+            await self.queue.put((seed, 0))
+        workers = [asyncio.create_task(self.worker(i)) for i in range(self.config.CONCURRENCY)]
+        await self.queue.join()
