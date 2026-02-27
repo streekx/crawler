@@ -11,22 +11,20 @@ class IndependentEngine:
         self.parser = parser
         self.queue = asyncio.Queue()
         self.seen_urls = set()
-        self.domain_history = {} # Google-style domain tracking
+        self.domain_history = {}
         self.total_crawled = 0
 
     async def worker(self, worker_id):
-        # Brave-like user agent to avoid being blocked
         headers = {"User-Agent": "StreekxBot/1.0 (+https://streekx.ai/bot)"}
-        
         async with aiohttp.ClientSession(headers=headers) as session:
             while self.total_crawled < self.config.MAX_PAGES:
                 try:
+                    # Queue se URL uthao
                     url, depth = await self.queue.get()
                     domain = urlparse(url).netloc
 
-                    # ADVANCED RULE 1: DOMAIN DIVERSITY (Brave-style)
-                    # Ek domain se 30 pages ke baad variety badhao
-                    if self.domain_history.get(domain, 0) > 30:
+                    # Rule: Ek domain ke limit se zyada pages skip karo taaki variety bani rahe
+                    if self.domain_history.get(domain, 0) > 40:
                         self.queue.task_done()
                         continue
 
@@ -42,7 +40,6 @@ class IndependentEngine:
                             data = self.parser.clean_and_extract(html, url)
 
                             if data and len(data['content']) > 100:
-                                # Data preparation
                                 payload = {
                                     "url": data['url'],
                                     "title": data['title'],
@@ -50,34 +47,34 @@ class IndependentEngine:
                                     "domain": domain,
                                     "last_indexed": datetime.utcnow().isoformat()
                                 }
-                                # Supabase mein save karna
                                 await self.storage.save(session, payload)
                                 
                                 self.total_crawled += 1
                                 self.seen_urls.add(url)
                                 self.domain_history[domain] = self.domain_history.get(domain, 0) + 1
 
-                                # ADVANCED RULE 2: SMART DISCOVERY
-                                links = data.get('links', [])
-                                random.shuffle(links) # Links shuffle taaki variety aaye
-                                
-                                for link in links[:15]: # Top 15 links lo taaki queue overload na ho
-                                    await self.queue.put((link, depth + 1))
+                                # RECURSION: Naye links ko wapas queue mein dalo (Ye rasta nahi rukne dega)
+                                for link in data.get('links', []):
+                                    if link not in self.seen_urls:
+                                        # Naye links ko queue mein add karna taaki workers chalta rahe
+                                        await self.queue.put((link, depth + 1))
 
-                    # Politeness delay taaki block na ho
                     await asyncio.sleep(self.config.DELAY)
-                    
                 except Exception:
                     pass
                 finally:
+                    # Ye important hai taaki queue empty na dikhaye jab tak kaam baki hai
                     self.queue.task_done()
 
     async def run(self, seeds):
-        # Seed links ko queue mein daalna
         for seed in seeds:
             await self.queue.put((seed, 0))
         
-        # Multiple workers ek saath kaam karenge
+        # Workers create karein
         workers = [asyncio.create_task(self.worker(i)) for i in range(self.config.CONCURRENCY)]
+        
+        # Jab tak queue mein kaam hai ya MAX_PAGES nahi hue, wait karein
         await self.queue.join()
-        for w in workers: w.cancel()
+        
+        for w in workers:
+            w.cancel()
