@@ -2,7 +2,7 @@ import asyncio
 import aiohttp
 from datetime import datetime
 from urllib.parse import urlparse, urljoin
-import random
+from bs4 import BeautifulSoup
 
 class IndependentEngine:
     def __init__(self, config, storage, parser):
@@ -19,62 +19,57 @@ class IndependentEngine:
         async with aiohttp.ClientSession(headers=headers) as session:
             while self.total_crawled < self.config.MAX_PAGES:
                 try:
-                    # Non-blocking way to get URLs from queue
                     url, depth = await self.queue.get()
                     domain = urlparse(url).netloc
 
-                    # Variety Rule: Ek domain ke limited pages hi lo
-                    if self.domain_history.get(domain, 0) > 50:
+                    if self.domain_history.get(domain, 0) > 100: # Per domain limit
                         self.queue.task_done()
                         continue
 
-                    if url in self.seen_urls or depth > self.config.MAX_DEPTH:
+                    if url in self.seen_urls:
                         self.queue.task_done()
                         continue
 
-                    print(f"[*] Worker-{worker_id} | Indexing: {url}")
+                    print(f"[*] Worker-{worker_id} | Indexing [{self.total_crawled}/100000]: {url}")
                     
                     async with session.get(url, timeout=15) as response:
                         if response.status == 200:
                             html = await response.text()
-                            data = self.parser.clean_and_extract(html, url)
-
-                            if data and len(data['content']) > 100:
-                                payload = {
-                                    "url": data['url'],
-                                    "title": data['title'],
-                                    "content": data['content'],
+                            
+                            # Deep Link Extraction (Directly here for safety)
+                            soup = BeautifulSoup(html, 'html.parser')
+                            title = soup.title.string if soup.title else "No Title"
+                            text = soup.get_text()
+                            
+                            if len(text) > 200:
+                                await self.storage.save(session, {
+                                    "url": url,
+                                    "title": title,
+                                    "content": text[:1000],
                                     "domain": domain,
                                     "last_indexed": datetime.utcnow().isoformat()
-                                }
-                                await self.storage.save(session, payload)
+                                })
                                 
                                 self.total_crawled += 1
                                 self.seen_urls.add(url)
                                 self.domain_history[domain] = self.domain_history.get(domain, 0) + 1
 
-                                # RECURSION FIX: Naye links ko queue mein daalna
-                                # Yahi wo rasta hai jo Google/Brave ki tarah infinite bana dega
-                                for link in data.get('links', []):
-                                    if link not in self.seen_urls:
+                                # RECURSION: Har page se saare links uthao
+                                for a_tag in soup.find_all('a', href=True):
+                                    link = urljoin(url, a_tag['href'])
+                                    if urlparse(link).netloc and link not in self.seen_urls:
                                         await self.queue.put((link, depth + 1))
 
-                    await asyncio.sleep(self.config.DELAY)
+                    await asyncio.sleep(0.5) # Fast crawling
                 except Exception:
                     pass
                 finally:
-                    # Queue task ko done mark karna zaroori hai
                     self.queue.task_done()
 
     async def run(self, seeds):
-        # Initial seeds daalna
         for seed in seeds:
             await self.queue.put((seed, 0))
         
         workers = [asyncio.create_task(self.worker(i)) for i in range(self.config.CONCURRENCY)]
-        
-        # Join ensures that main doesn't finish until queue is empty
         await self.queue.join()
-        
-        for w in workers:
-            w.cancel()
+        for w in workers: w.cancel()
